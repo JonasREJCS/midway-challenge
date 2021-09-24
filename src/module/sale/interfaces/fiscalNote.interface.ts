@@ -1,5 +1,5 @@
 export interface FiscalNoteInterface {
-    id: string
+    id?: string
     productId: number
     cpf: string
     saleDate: Date
