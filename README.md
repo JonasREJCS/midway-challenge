@@ -1,6 +1,6 @@
 ## Description
 
-This is a challenge repository.
+This is a challenge repository. This challenge was solved using NestJS with Typescript, MongoDB and Docker. This challenge has unit tests to ensure quality.
 
 ## Installation
 
