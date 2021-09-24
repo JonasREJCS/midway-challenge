@@ -21,15 +21,23 @@ export class SaleService {
         private saleRepository: SaleRepository,
         private productService: ProductService) { }
 
+
+    private validateRegisterSaleDTO(registerSaleDTO: RegisterSaleDTO) {
+        if (!registerSaleDTO?.soldProductId)
+            throw new Error(SaleErrorsEnum.INVALID_PRODUCT_ID);
+        if (!registerSaleDTO?.cpf || !registerSaleDTO?.cpf.trim())
+            throw new Error(SaleErrorsEnum.INVALID_CPF);
+        if (!registerSaleDTO?.saleDate)
+            throw new Error(SaleErrorsEnum.INVALID_DATE);
+    }
+
     async registerSale(registerSaleDTO: RegisterSaleDTO): Promise<SaleInterface> {
         try {
-            if (!registerSaleDTO?.soldProductId) throw new Error(SaleErrorsEnum.INVALID_PRODUCT_ID)
-            if (!registerSaleDTO?.cpf || !registerSaleDTO?.cpf.trim()) throw new Error(SaleErrorsEnum.INVALID_CPF)
-            if (!registerSaleDTO?.saleDate) throw new Error(SaleErrorsEnum.INVALID_DATE)
+            this.validateRegisterSaleDTO(registerSaleDTO);
 
             const soldProduct = await this.productService.getProductById(registerSaleDTO.soldProductId)
 
-            if (!soldProduct) throw new Error(SaleErrorsEnum.PRODUCT_NOT_FOUND)
+            if (!soldProduct) throw new Error(SaleErrorsEnum.REGISTRATION_PRODUCT_NOT_FOUND)
             if (soldProduct.estoque < 1) throw new Error(SaleErrorsEnum.PRODUCT_OUT_OF_STOCK)
 
             const sale: SaleInterface = {
@@ -47,7 +55,7 @@ export class SaleService {
                     id: soldProduct.id
                 }
             };
-            
+
             soldProduct.estoque -= 1
 
             await Promise.all([
@@ -67,7 +75,7 @@ export class SaleService {
 
     private validateCancelDTO(cancelSaleDTO: CancelSaleDTO) {
         if (!cancelSaleDTO?.fiscalNoteId)
-            throw new Error(SaleErrorsEnum.INVALID_PRODUCT_ID);
+            throw new Error(SaleErrorsEnum.INVALID_FISCAL_NOTE_ID);
         if (!cancelSaleDTO?.cpf || !cancelSaleDTO?.cpf.trim())
             throw new Error(SaleErrorsEnum.INVALID_CPF);
         if (!cancelSaleDTO?.productId)
@@ -79,7 +87,7 @@ export class SaleService {
             this.validateCancelDTO(cancelSaleDTO);
 
             const soldProduct = await this.productService.getProductById(cancelSaleDTO.productId)
-            if (!soldProduct) throw new Error(SaleErrorsEnum.PRODUCT_CANCELATION_NOT_FOUND)
+            if (!soldProduct) throw new Error(SaleErrorsEnum.CANCELATION_PRODUCT_NOT_FOUND)
 
             const foundSale: SaleInterface = await this.saleRepository.findOne(cancelSaleDTO)
             if (!foundSale) throw new Error(SaleErrorsEnum.SALE_CANCELATION_NOT_FOUND)
