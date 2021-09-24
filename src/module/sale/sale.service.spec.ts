@@ -12,6 +12,7 @@ describe('Sale service', () => {
     let saleService: SaleService
     let saleModel = {
         create: async (): Promise<SaleInterface> => Promise.resolve(saleDatabaseMock),
+        findByIdAndDelete: async (): Promise<void> => Promise.resolve(null)
     }
     let productModel = {
         findOne: async (): Promise<ProductInterface> => Promise.resolve(productDatabaseMock),
@@ -50,6 +51,14 @@ describe('Sale service', () => {
         saleDatabaseMockCopy.fiscalNote.saleDate = now
 
         expect(result).toStrictEqual(saleDatabaseMockCopy)
+    })
+
+    it('Should cancel sale', async () => {
+        expect(() => { saleService.cancelSale({
+            cpf: '212.193.640-88',
+            productId: 1,
+            fiscalNoteId: '1',
+        }) }).resolves
     })
 
     it('Should trim cpf and return registered sale', async () => {
