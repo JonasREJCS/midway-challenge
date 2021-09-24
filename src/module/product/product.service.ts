@@ -51,6 +51,14 @@ export class ProductService {
         return Array.from(result.values())
     }
 
+    public async save(product: ProductInterface): Promise<ProductInterface> {
+        const result: ProductInterface = await this.productRepository.save(product)
+
+        this.logger.log(`Saved product [${product.id}]`)
+
+        return result
+    }
+
     public async initProductsDatabase(): Promise<void> {
         const initialProducts: ProductInterface[] = this.getDistinctProducts(productData)
 
