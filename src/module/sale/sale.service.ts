@@ -22,6 +22,8 @@ export class SaleService {
 
     async registerSale(registerSaleDTO: RegisterSaleDTO): Promise<SaleInterface> {
         if (!registerSaleDTO?.soldProductId) throw new Error(SaleErrorsEnum.INVALID_PRODUCT_ID)
+        if (!registerSaleDTO?.cpf) throw new Error(SaleErrorsEnum.INVALID_CPF)
+        if (!registerSaleDTO?.saleDate) throw new Error(SaleErrorsEnum.INVALID_DATE)
 
         const soldProduct = await this.productService.getProductById(registerSaleDTO.soldProductId)
 
@@ -29,7 +31,7 @@ export class SaleService {
 
         const sale: SaleInterface = {
             fiscalNote: {
-                cpf: registerSaleDTO.cpf,
+                cpf: registerSaleDTO.cpf.trim(),
                 id: v4(),
                 productId: registerSaleDTO.soldProductId,
                 saleDate: registerSaleDTO.saleDate
