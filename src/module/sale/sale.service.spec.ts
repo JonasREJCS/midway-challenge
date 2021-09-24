@@ -88,13 +88,6 @@ describe('Sale service', () => {
         })).rejects.toThrowError(SaleErrorsEnum.INVALID_CPF)
     })
 
-    it('[ERROR] Should throw error if cpf is blank', async () => {
-        expect(saleService.registerSale({
-            cpf: '   ',
-            saleDate: new Date(),
-            soldProductId: 1
-        })).rejects.toThrowError(SaleErrorsEnum.INVALID_CPF)
-    })
 
     it('[ERROR] Should throw error if saleDate is undefined', async () => {
         expect(saleService.registerSale({
