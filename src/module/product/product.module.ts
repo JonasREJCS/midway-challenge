@@ -1,4 +1,3 @@
-import { ProductController } from './product.controller';
 import { ProductService } from './product.service';
 /*
 https://docs.nestjs.com/modules
@@ -14,8 +13,7 @@ import { ProductSchema } from './product.schema';
         [{ name: 'product', schema: ProductSchema, collection: 'product' }],
         'midwayChallenge',
 ),],
-    controllers: [
-        ProductController,],
+    controllers: [],
     providers: [
         ProductService, ProductRepository],
         exports: [ProductService]
