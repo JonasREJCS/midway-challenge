@@ -21,36 +21,40 @@ export class SaleService {
         private productService: ProductService) { }
 
     async registerSale(registerSaleDTO: RegisterSaleDTO): Promise<SaleInterface> {
-        if (!registerSaleDTO?.soldProductId) throw new Error(SaleErrorsEnum.INVALID_PRODUCT_ID)
-        if (!registerSaleDTO?.cpf) throw new Error(SaleErrorsEnum.INVALID_CPF)
-        if (!registerSaleDTO?.saleDate) throw new Error(SaleErrorsEnum.INVALID_DATE)
+        try {
+            if (!registerSaleDTO?.soldProductId) throw new Error(SaleErrorsEnum.INVALID_PRODUCT_ID)
+            if (!registerSaleDTO?.cpf.trim()) throw new Error(SaleErrorsEnum.INVALID_CPF)
+            if (!registerSaleDTO?.saleDate) throw new Error(SaleErrorsEnum.INVALID_DATE)
 
-        const soldProduct = await this.productService.getProductById(registerSaleDTO.soldProductId)
+            const soldProduct = await this.productService.getProductById(registerSaleDTO.soldProductId)
 
-        if (!soldProduct) throw new Error(SaleErrorsEnum.PRODUCT_NOT_FOUND)
+            if (!soldProduct) throw new Error(SaleErrorsEnum.PRODUCT_NOT_FOUND)
 
-        const sale: SaleInterface = {
-            fiscalNote: {
-                cpf: registerSaleDTO.cpf.trim(),
-                id: v4(),
-                productId: registerSaleDTO.soldProductId,
-                saleDate: registerSaleDTO.saleDate
-            },
-            productData: {
-                descricao: soldProduct.descricao,
-                nome: soldProduct.nome,
-                tamanho: soldProduct.tamanho,
-                tipo: soldProduct.tipo,
-                id: soldProduct.id
-            }
-        };
+            const sale: SaleInterface = {
+                fiscalNote: {
+                    cpf: registerSaleDTO.cpf.trim(),
+                    id: v4(),
+                    productId: registerSaleDTO.soldProductId,
+                    saleDate: registerSaleDTO.saleDate
+                },
+                productData: {
+                    descricao: soldProduct.descricao,
+                    nome: soldProduct.nome,
+                    tamanho: soldProduct.tamanho,
+                    tipo: soldProduct.tipo,
+                    id: soldProduct.id
+                }
+            };
 
-        await this.saleRepository.save(sale)
+            await this.saleRepository.save(sale)
 
-        this.logger.log(`Registered sale [${sale.fiscalNote.id}]`)
+            this.logger.log(`Registered sale [${sale.fiscalNote.id}]`)
 
-        return sale
-
+            return sale
+        } catch (error) {
+            this.logger.error(error.message)
+            throw error
+        }
     }
 
 }
