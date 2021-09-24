@@ -75,9 +75,9 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 Nest is [MIT licensed](LICENSE).
 
-# Desafio Node.js Midway/Riachuelo:
+# Desafio Node.js:
 
-Nosso desafio consiste em 2 partes, ambos podem ser entregues no mesmo repositório de sua preferência. Em caso de dúvidas, favor nos contate pelo e-mail utilizado para envio deste arquivo.
+Nosso desafio consiste em 2 partes, ambos podem ser entregues no mesmo repositório de sua preferência.
 
 Após finalizar, nos informe via e-mail para que possamos realizar a validação da solução proposta :)
 
