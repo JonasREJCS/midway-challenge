@@ -1,16 +1,21 @@
+import { model } from "mongoose"
+import { productDatabaseMock } from "./mocks/productDatabase.mock"
 import { productData } from "./product.data"
+import { ProductInterface } from "./product.interface"
 import { ProductRepository } from "./product.repository"
 import { ProductService } from "./product.service"
 
 describe('Product service', () => {
     let productService: ProductService
     let productRepository: ProductRepository
-
+    let productModel = {
+        findOne: async (): Promise<ProductInterface> => Promise.resolve(productDatabaseMock),
+        findOneAndUpdate: async (): Promise<ProductInterface> => Promise.resolve(productDatabaseMock),
+    }
 
     beforeEach(async () => {
-        productRepository = new ProductRepository(new Map())
+        productRepository = new ProductRepository(model as any)
         productService = new ProductService(productRepository)
-        productService.initProductsDatabase(new Map)
     })
 
     it('Should be defined', () => {
