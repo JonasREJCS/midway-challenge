@@ -1,4 +1,3 @@
-import { model } from "mongoose"
 import { productDatabaseMock } from "./mocks/productDatabase.mock"
 import { productData } from "./product.data"
 import { ProductInterface } from "./product.interface"
@@ -14,7 +13,7 @@ describe('Product service', () => {
     }
 
     beforeEach(async () => {
-        productRepository = new ProductRepository(model as any)
+        productRepository = new ProductRepository(productModel as any)
         productService = new ProductService(productRepository)
     })
 
@@ -39,5 +38,9 @@ describe('Product service', () => {
                 dataAtualizacao: result[0].dataAtualizacao
             }
         ])
+    })
+
+    it('Should initialize database', async () => {
+        expect(() => { productService.initProductsDatabase() }).resolves
     })
 })
