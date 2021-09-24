@@ -4,6 +4,12 @@ import { ProductDataSchema, FiscalNoteSchema } from '.';
 const { Schema } = mongoose;
 
 export const SaleSchema = new Schema({
-    productData: ProductDataSchema,
-    fiscalNote: FiscalNoteSchema
-}, { timestamps: false, strict: false });
+    productData: {
+        type: ProductDataSchema,
+        _id: false
+    },
+    fiscalNote: {
+        type: FiscalNoteSchema,
+        _id: false
+    }
+}, { timestamps: false, strict: true, _id: true });
