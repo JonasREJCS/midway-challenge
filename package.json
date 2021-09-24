@@ -71,6 +71,12 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
+    "coveragePathIgnorePatterns": [
+      "src/module/sale/dtos",
+      "src/module/sale/schemas",
+      "src/module/sale/interfaces",
+      "src/core"
+    ],
     "testEnvironment": "node"
   }
 }
