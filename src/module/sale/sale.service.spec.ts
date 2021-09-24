@@ -12,7 +12,8 @@ describe('Sale service', () => {
     let saleService: SaleService
     let saleModel = {
         create: async (): Promise<SaleInterface> => Promise.resolve(saleDatabaseMock),
-        findByIdAndDelete: async (): Promise<void> => Promise.resolve(null)
+        findByIdAndDelete: async (): Promise<void> => Promise.resolve(null),
+        findOne: async (): Promise<SaleInterface> => Promise.resolve(saleDatabaseMock),
     }
     let productModel = {
         findOne: async (): Promise<ProductInterface> => Promise.resolve(productDatabaseMock),
@@ -23,6 +24,15 @@ describe('Sale service', () => {
     let productRepository: ProductRepository
 
     beforeEach(() => {
+        saleModel = {
+            create: async (): Promise<SaleInterface> => Promise.resolve(saleDatabaseMock),
+            findByIdAndDelete: async (): Promise<void> => Promise.resolve(null),
+            findOne: async (): Promise<SaleInterface> => Promise.resolve(saleDatabaseMock),
+        }
+        productModel = {
+            findOne: async (): Promise<ProductInterface> => Promise.resolve(productDatabaseMock),
+            findOneAndUpdate: async (): Promise<ProductInterface> => Promise.resolve(productDatabaseMock),
+        }
         productRepository = new ProductRepository(productModel as any)
         saleRepository = new SaleRepository(saleModel as any)
         productService = new ProductService(productRepository)
@@ -53,13 +63,123 @@ describe('Sale service', () => {
         expect(result).toStrictEqual(saleDatabaseMockCopy)
     })
 
+    it('[ERROR] Should throw error if sale registration is called and product is not found', async () => {
+        productModel = {
+            findOne: async (): Promise<ProductInterface> => Promise.resolve(null),
+            findOneAndUpdate: async (): Promise<ProductInterface> => Promise.resolve(null),
+        }
+
+        productRepository = new ProductRepository(productModel as any)
+        saleRepository = new SaleRepository(saleModel as any)
+        productService = new ProductService(productRepository)
+        saleService = new SaleService(saleRepository, productService)
+        
+        await expect(saleService.registerSale({
+            cpf: '212.193.640-88',
+            saleDate: new Date(),
+            soldProductId: 1
+        })).rejects.toThrowError(SaleErrorsEnum.REGISTRATION_PRODUCT_NOT_FOUND)
+    })
+
+    it('[ERROR] Should throw error if sale registration is called and product is out of stock', async () => {
+        const outOfStockProduct: ProductInterface = {... productDatabaseMock}
+        outOfStockProduct.estoque = 0
+        
+        productModel = {
+            findOne: async (): Promise<ProductInterface> => Promise.resolve(outOfStockProduct),
+            findOneAndUpdate: async (): Promise<ProductInterface> => Promise.resolve(outOfStockProduct),
+        }
+
+        productRepository = new ProductRepository(productModel as any)
+        saleRepository = new SaleRepository(saleModel as any)
+        productService = new ProductService(productRepository)
+        saleService = new SaleService(saleRepository, productService)
+        
+        await expect(saleService.registerSale({
+            cpf: '212.193.640-88',
+            saleDate: new Date(),
+            soldProductId: 1
+        })).rejects.toThrowError(SaleErrorsEnum.PRODUCT_OUT_OF_STOCK)
+    })
+
     it('Should cancel sale', async () => {
-        expect(() => { saleService.cancelSale({
+        await expect(saleService.cancelSale({
             cpf: '212.193.640-88',
             productId: 1,
             fiscalNoteId: '1',
-        }) }).resolves
+        })).resolves.not.toThrow()
     })
+
+    it('[ERROR] Should throw error if sale cancelation is called and product is not found', async () => {
+        saleModel = {
+            create: async (): Promise<SaleInterface> => Promise.resolve(saleDatabaseMock),
+            findByIdAndDelete: async (): Promise<void> => Promise.resolve(null),
+            findOne: async (): Promise<SaleInterface> => Promise.resolve(null),
+        }
+        productModel = {
+            findOne: async (): Promise<ProductInterface> => Promise.resolve(null),
+            findOneAndUpdate: async (): Promise<ProductInterface> => Promise.resolve(null),
+        }
+
+        productRepository = new ProductRepository(productModel as any)
+        saleRepository = new SaleRepository(saleModel as any)
+        productService = new ProductService(productRepository)
+        saleService = new SaleService(saleRepository, productService)
+        
+        await expect(saleService.cancelSale({
+            cpf: '212.193.640-88',
+            productId: 1,
+            fiscalNoteId: '1',
+        })).rejects.toThrowError(SaleErrorsEnum.CANCELATION_PRODUCT_NOT_FOUND)
+    })
+
+    it('[ERROR] Should throw error if sale cancelation is called and sale is not found', async () => {
+        saleModel = {
+            create: async (): Promise<SaleInterface> => Promise.resolve(saleDatabaseMock),
+            findByIdAndDelete: async (): Promise<void> => Promise.resolve(null),
+            findOne: async (): Promise<SaleInterface> => Promise.resolve(null),
+        }
+        productModel = {
+            findOne: async (): Promise<ProductInterface> => Promise.resolve(productDatabaseMock),
+            findOneAndUpdate: async (): Promise<ProductInterface> => Promise.resolve(productDatabaseMock),
+        }
+        
+        productRepository = new ProductRepository(productModel as any)
+        saleRepository = new SaleRepository(saleModel as any)
+        productService = new ProductService(productRepository)
+        saleService = new SaleService(saleRepository, productService)
+        
+        await expect(saleService.cancelSale({
+            cpf: '212.193.640-88',
+            productId: 1,
+            fiscalNoteId: '1',
+        })).rejects.toThrowError(SaleErrorsEnum.SALE_CANCELATION_NOT_FOUND)
+    })
+
+    it('[ERROR] Should throw error if sale cancelation is called and cpf is undefined', async () => {
+        await expect(saleService.cancelSale({
+            cpf: undefined,
+            productId: 1,
+            fiscalNoteId: '1',
+        })).rejects.toThrowError(SaleErrorsEnum.INVALID_CPF)
+    })
+
+    it('[ERROR] Should throw error if sale cancelation is called and productId is undefined', async () => {
+        await expect(saleService.cancelSale({
+            cpf: '212.193.640-88',
+            productId: undefined,
+            fiscalNoteId: '1',
+        })).rejects.toThrowError(SaleErrorsEnum.INVALID_PRODUCT_ID)
+    })
+
+    it('[ERROR] Should throw error if sale cancelation is called and fiscalNoteId is undefined', async () => {
+        await expect(saleService.cancelSale({
+            cpf: '212.193.640-88',
+            productId: 1,
+            fiscalNoteId: undefined,
+        })).rejects.toThrowError(SaleErrorsEnum.INVALID_FISCAL_NOTE_ID)
+    })
+
 
     it('Should trim cpf and return registered sale', async () => {
         const now = new Date()
