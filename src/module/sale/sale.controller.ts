@@ -34,7 +34,8 @@ export class SaleController {
     try {
       await this.saleService.cancelSale(cancelSaleDTO);
       return {
-        sucess: true
+        sucess: true,
+        message: 'Sale cancelation sucess.'
       }
     } catch (error) {
       return {
